@@ -18,7 +18,6 @@ import {
 import {
     AppDisplay,
     AppFavorites,
-    BoxPointer,
     Dash,
     Main,
     PopupMenu,
@@ -1188,7 +1187,7 @@ const DockAppIconMenu = class DockAppIconMenu extends PopupMenu.PopupMenu {
 
     popup(_activatingButton) {
         this._rebuildMenu();
-        this.open(BoxPointer.PopupAnimation.FULL);
+        Utils.openMenu(this, { animate: true });
     }
 
     removeAll() {

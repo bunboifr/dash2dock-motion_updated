@@ -26,7 +26,7 @@ cursor and reflows their neighbours around them.
 
 ## Requirements
 
-GNOME Shell 50, on Wayland or X11.
+GNOME Shell 50 and 51 (tested on GNOME 51.1), on Wayland or X11.
 
 Blur my Shell is optional. If you want the dock blurred, install it and enable
 its dash blur.
@@ -36,12 +36,12 @@ its dash blur.
 ### From source
 
 ```sh
-git clone https://github.com/Unmade760/dash2dock-motion.git
-cd dash2dock-motion
+git clone https://github.com/bunboifr/dash2dock-motion_updated.git
+cd dash2dock-motion_updated
 make install
 ```
 
-GNOME Shell 50 has no extension hot-reload, so log out and back in, then:
+GNOME Shell 50 and 51 have no extension hot-reload, so log out and back in, then:
 
 ```sh
 gnome-extensions enable dash2dock-motion@unmade.space

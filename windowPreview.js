@@ -18,7 +18,6 @@ import {
 } from './dependencies/gi.js';
 
 import {
-    BoxPointer,
     Main,
     PopupMenu,
     Workspace,
@@ -81,7 +80,7 @@ export class WindowPreviewMenu extends PopupMenu.PopupMenu {
         const windows = this._source.getInterestingWindows();
         if (windows.length > 0) {
             this._redisplay();
-            this.open(BoxPointer.PopupAnimation.FULL);
+            Utils.openMenu(this, { animate: true });
             this.actor.navigate_focus(null, St.DirectionType.TAB_FORWARD, false);
             this._source.emit('sync-tooltip');
         }
@@ -111,10 +110,16 @@ class WindowPreviewList extends PopupMenu.PopupMenuSection {
 
         const position = Utils.getPosition();
         this.isHorizontal = position === St.Side.BOTTOM || position === St.Side.TOP;
-        // Remove this when can use GNOME 48
-        this.box.set_vertical?.(!this.isHorizontal);
-        this.box.set_orientation?.(this.isHorizontal
-            ? Clutter.Orientation.HORIZONTAL : Clutter.Orientation.VERTICAL);
+        const orientation = this.isHorizontal
+            ? Clutter.Orientation.HORIZONTAL : Clutter.Orientation.VERTICAL;
+        if (this.box.set_orientation)
+            this.box.set_orientation(orientation);
+        else if ('orientation' in this.box || this.box.orientation !== undefined)
+            this.box.orientation = orientation;
+        else if (this.box.set_vertical)
+            this.box.set_vertical(!this.isHorizontal);
+        else
+            this.box.vertical = !this.isHorizontal;
         this.box.set_name('dashtodockWindowList');
         Utils.addActor(this.actor, this.box);
         this.actor._delegate = this;
@@ -280,7 +285,7 @@ class WindowPreviewList extends PopupMenu.PopupMenuSection {
             addedItems[i].item.show(animate);
 
         if (newWin.length < 1)
-            this._getTopMenu().close(~0);
+            Utils.closeMenu(this._getTopMenu(), { animate: false });
 
         // As for upstream:
         // St.ScrollView always requests space horizontally for a possible vertical
@@ -385,11 +390,12 @@ class WindowPreviewMenuItem extends PopupMenu.PopupBaseMenuItem {
         });
 
         const box = new St.BoxLayout({
+            orientation: Clutter.Orientation.VERTICAL,
             reactive: true,
             x_expand: true,
         });
 
-        if (box.orientation !== undefined)
+        if ('orientation' in box || box.orientation !== undefined)
             box.orientation = Clutter.Orientation.VERTICAL;
         else
             box.vertical = true;

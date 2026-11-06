@@ -17,6 +17,10 @@ import {
 } from './imports.js';
 
 import {Extension} from './dependencies/shell/extensions/extension.js';
+import {
+    BoxPointer,
+    PopupMenu,
+} from './dependencies/shell/ui.js';
 
 export const SignalsHandlerFlags = Object.freeze({
     NONE: 0,
@@ -829,3 +833,41 @@ export function addActor(element, actor) {
 
 export const clamp = (v, m, M) => Math.min(Math.max(v, m), M);
 export const clampDouble = v => clamp(v, 0, 1);
+
+/**
+ * Opens a PopupMenu with compatibility across GNOME Shell versions.
+ * In GNOME 51+, PopupMenu.open() expects a params object { animate: boolean, fadeOnly: boolean }.
+ * In GNOME <= 50, PopupMenu.open() expects a BoxPointer.PopupAnimation constant or boolean.
+ *
+ * @param {PopupMenu.PopupMenuBase} menu The menu to open
+ * @param {object} [params] Optional parameters
+ * @param {boolean} [params.animate=true] Whether to animate opening
+ * @param {boolean} [params.fadeOnly=false] Whether to only fade
+ */
+export function openMenu(menu, params = { animate: true }) {
+    if (menu._getPopupAnimationFromParams || PopupMenu.PopupMenu.prototype._getPopupAnimationFromParams) {
+        menu.open(params);
+    } else {
+        const animate = (typeof params === 'object') ? (params.animate ?? true) : Boolean(params);
+        menu.open(animate ? BoxPointer.PopupAnimation.FULL : BoxPointer.PopupAnimation.NONE);
+    }
+}
+
+/**
+ * Closes a PopupMenu with compatibility across GNOME Shell versions.
+ * In GNOME 51+, PopupMenu.close() expects a params object { animate: boolean, fadeOnly: boolean }.
+ * In GNOME <= 50, PopupMenu.close() expects a BoxPointer.PopupAnimation constant or boolean.
+ *
+ * @param {PopupMenu.PopupMenuBase} menu The menu to close
+ * @param {object} [params] Optional parameters
+ * @param {boolean} [params.animate=false] Whether to animate closing
+ * @param {boolean} [params.fadeOnly=false] Whether to only fade
+ */
+export function closeMenu(menu, params = { animate: false }) {
+    if (menu._getPopupAnimationFromParams || PopupMenu.PopupMenu.prototype._getPopupAnimationFromParams) {
+        menu.close(typeof params === 'object' ? params : { animate: Boolean(params) });
+    } else {
+        const animate = (typeof params === 'object') ? (params.animate ?? false) : Boolean(params);
+        menu.close(animate ? BoxPointer.PopupAnimation.FULL : BoxPointer.PopupAnimation.NONE);
+    }
+}
